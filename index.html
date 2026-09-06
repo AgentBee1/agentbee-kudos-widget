@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit a Kudos Award — AgentBee</title>
+<style>
+  :root {
+    --brand: #2563eb;
+    --brand-dark: #1d4ed8;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1a2233;
+    --muted: #6b7280;
+    --border: #e2e6ee;
+    --error: #dc2626;
+    --success: #16a34a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 20px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input[type="text"],
+  input[type="url"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+  }
+  input[type="text"]:focus,
+  input[type="url"]:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    background: #fafbfd;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
+  .file-drop {
+    margin-top: 10px;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    padding: 20px 12px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .file-drop.has-file {
+    border-color: var(--brand);
+    color: var(--text);
+  }
+  input[type="file"] { display: none; }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .checkbox-row input { margin-top: 3px; }
+  .checkbox-row label {
+    margin: 0;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .website-field {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+  }
+  button[type="submit"] {
+    width: 100%;
+    margin-top: 24px;
+    padding: 12px;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button[type="submit"]:hover { background: var(--brand-dark); }
+  button[type="submit"]:disabled {
+    background: #a9bce4;
+    cursor: not-allowed;
+  }
+  .status {
+    margin-top: 18px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+  .status.error {
+    display: block;
+    background: #fef2f2;
+    color: var(--error);
+    border: 1px solid #fecaca;
+  }
+  .status.success {
+    display: block;
+    background: #f0fdf4;
+    color: var(--success);
+    border: 1px solid #bbf7d0;
+  }
+  .status a { color: inherit; font-weight: 700; }
+  .field-error {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Submit a Kudos Award 🎖️</h1>
+    <p class="subtitle">Won an award? Tell us about it and we'll post it to the Kudos page for the AgentBee community to see.</p>
+
+    <form id="kudos-form" novalidate>
+      <label for="businessName">Business Name</label>
+      <input type="text" id="businessName" name="businessName" placeholder="e.g. Global Study Partners" required maxlength="200">
+
+      <label>Your Award</label>
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-mode="link">Link to award</button>
+        <button type="button" class="tab-btn" data-mode="image">Upload image</button>
+      </div>
+
+      <div class="mode-panel active" data-panel="link">
+        <input type="url" id="awardLink" name="awardLink" placeholder="https://example.com/your-award" maxlength="1000">
+        <p class="hint">Paste the link to a page, article, or announcement about your award.</p>
+      </div>
+
+      <div class="mode-panel" data-panel="image">
+        <div class="file-drop" id="fileDrop">Click to choose an image, or drag one here</div>
+        <input type="file" id="awardImage" name="awardImage" accept="image/png,image/jpeg,image/webp,image/gif">
+        <p class="hint">JPG, PNG, WEBP or GIF. Please keep the file under 4 MB.</p>
+      </div>
+
+      <p class="field-error" id="formError"></p>
+
+      <!-- Honeypot: left blank by humans, often filled in by bots. Hidden from view and tab order. -->
+      <div class="website-field" aria-hidden="true">
+        <label for="website">Leave this field blank</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="confirmNotRobot" name="confirmNotRobot" required>
+        <label for="confirmNotRobot">I'm not a robot, and this is a genuine award I'd like to share.</label>
+      </div>
+
+      <button type="submit" id="submitBtn">Submit Award</button>
+
+      <div class="status" id="statusBox"></div>
+    </form>
+  </div>
+
+<script>
+(function () {
+  const form = document.getElementById('kudos-form');
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.mode-panel');
+  const awardLinkInput = document.getElementById('awardLink');
+  const awardImageInput = document.getElementById('awardImage');
+  const fileDrop = document.getElementById('fileDrop');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusBox = document.getElementById('statusBox');
+  const formError = document.getElementById('formError');
+  let mode = 'link';
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      mode = btn.dataset.mode;
+      tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.panel === mode));
+      formError.style.display = 'none';
+    });
+  });
+
+  fileDrop.addEventListener('click', () => awardImageInput.click());
+  awardImageInput.addEventListener('change', () => {
+    if (awardImageInput.files && awardImageInput.files[0]) {
+      const f = awardImageInput.files[0];
+      fileDrop.textContent = f.name + ' (' + Math.round(f.size / 1024) + ' KB)';
+      fileDrop.classList.add('has-file');
+    } else {
+      fileDrop.textContent = 'Click to choose an image, or drag one here';
+      fileDrop.classList.remove('has-file');
+    }
+  });
+  ['dragover', 'drop'].forEach(evt => {
+    fileDrop.addEventListener(evt, e => e.preventDefault());
+  });
+  fileDrop.addEventListener('drop', e => {
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      awardImageInput.files = e.dataTransfer.files;
+      awardImageInput.dispatchEvent(new Event('change'));
+    }
+  });
+
+  function showError(msg) {
+    formError.textContent = msg;
+    formError.style.display = 'block';
+  }
+
+  function showStatus(type, html) {
+    statusBox.className = 'status ' + type;
+    statusBox.innerHTML = html;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formError.style.display = 'none';
+    statusBox.className = 'status';
+    statusBox.innerHTML = '';
+
+    const businessName = document.getElementById('businessName').value.trim();
+    const awardLink = awardLinkInput.value.trim();
+    const file = awardImageInput.files[0];
+    const confirmed = document.getElementById('confirmNotRobot').checked;
+
+    if (!businessName) {
+      showError('Please enter your business name.');
+      return;
+    }
+    if (mode === 'link' && !awardLink) {
+      showError('Please paste a link to your award.');
+      return;
+    }
+    if (mode === 'image' && !file) {
+      showError('Please choose an image to upload.');
+      return;
+    }
+    if (mode === 'image' && file && file.size > 4 * 1024 * 1024) {
+      showError('That image is over 4 MB. Please choose a smaller file.');
+      return;
+    }
+    if (!confirmed) {
+      showError('Please check the box to confirm before submitting.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('businessName', businessName);
+    formData.append('website', document.getElementById('website').value); // honeypot
+    formData.append('confirmNotRobot', confirmed ? 'yes' : '');
+    if (mode === 'link') {
+      formData.append('awardLink', awardLink);
+    } else {
+      formData.append('awardImage', file);
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      const res = await fetch('/api/submit-kudos', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        showStatus('error', (data && data.error) || 'Something went wrong submitting your award. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Award';
+        return;
+      }
+
+      form.reset();
+      fileDrop.textContent = 'Click to choose an image, or drag one here';
+      fileDrop.classList.remove('has-file');
+      showStatus('success', 'Thanks! Your award has been posted to the Kudos page.' + (data && data.url ? ' <a href="' + data.url + '" target="_blank" rel="noopener noreferrer">View it here</a>.' : ''));
+      submitBtn.textContent = 'Submit Award';
+      submitBtn.disabled = false;
+    } catch (err) {
+      showStatus('error', 'Network error — please check your connection and try again.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Award';
+    }
+  });
+})();
+</script>
+</body>
+</html>
