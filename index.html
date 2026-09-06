@@ -196,7 +196,7 @@
       <label>Your Award</label>
       <div class="tabs">
         <button type="button" class="tab-btn active" data-mode="link">Link to award</button>
-        <button type="button" class="tab-btn" data-mode="image">Upload image</button>
+        <button type="button" class="tab-btn" data-mode="image">Upload image or PDF</button>
       </div>
 
       <div class="mode-panel active" data-panel="link">
@@ -205,9 +205,9 @@
       </div>
 
       <div class="mode-panel" data-panel="image">
-        <div class="file-drop" id="fileDrop">Click to choose an image, or drag one here</div>
-        <input type="file" id="awardImage" name="awardImage" accept="image/png,image/jpeg,image/webp,image/gif">
-        <p class="hint">JPG, PNG, WEBP or GIF. Please keep the file under 4 MB.</p>
+        <div class="file-drop" id="fileDrop">Click to choose a file, or drag one here</div>
+        <input type="file" id="awardImage" name="awardImage" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf">
+        <p class="hint">JPG, PNG, WEBP, GIF or PDF. Please keep the file under 4 MB.</p>
       </div>
 
       <p class="field-error" id="formError"></p>
@@ -258,7 +258,7 @@
       fileDrop.textContent = f.name + ' (' + Math.round(f.size / 1024) + ' KB)';
       fileDrop.classList.add('has-file');
     } else {
-      fileDrop.textContent = 'Click to choose an image, or drag one here';
+      fileDrop.textContent = 'Click to choose a file, or drag one here';
       fileDrop.classList.remove('has-file');
     }
   });
@@ -302,11 +302,11 @@
       return;
     }
     if (mode === 'image' && !file) {
-      showError('Please choose an image to upload.');
+      showError('Please choose a file to upload.');
       return;
     }
     if (mode === 'image' && file && file.size > 4 * 1024 * 1024) {
-      showError('That image is over 4 MB. Please choose a smaller file.');
+      showError('That file is over 4 MB. Please choose a smaller one.');
       return;
     }
     if (!confirmed) {
@@ -342,7 +342,7 @@
       }
 
       form.reset();
-      fileDrop.textContent = 'Click to choose an image, or drag one here';
+      fileDrop.textContent = 'Click to choose a file, or drag one here';
       fileDrop.classList.remove('has-file');
       showStatus('success', '<ul><li>Thanks! Your submission is under review.</li><li>Submit another award — use the form above.</li></ul>');
       submitBtn.textContent = 'Submit Award';
