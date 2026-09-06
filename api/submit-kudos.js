@@ -1,8 +1,8 @@
 // api/submit-kudos.js
 //
-// Handles the Kudos submission form: validates the entry, uploads an image to
-// Circle (if one was provided) via the direct-upload flow, and creates a
-// published post in the "Kudos - Agent Submitted" space.
+// Handles the Kudos submission form: validates the entry, uploads an image
+// or PDF to Circle (if one was provided) via the direct-upload flow, and
+// creates a published post in the "Kudos - Agent Submitted" space.
 //
 // Required environment variables (set these in the Vercel project settings):
 //   CIRCLE_API_TOKEN     - Circle Admin API v2 token (Circle admin: Settings -> Developers -> Tokens -> Admin V2)
@@ -25,6 +25,7 @@ const CIRCLE_AUTHOR_EMAIL = process.env.CIRCLE_AUTHOR_EMAIL || null;
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB — stays under Vercel's request body limit
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+const ALLOWED_FILE_TYPES = [...ALLOWED_IMAGE_TYPES, 'application/pdf'];
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -45,7 +46,7 @@ module.exports = async (req, res) => {
     console.error('Form parse error:', err);
     const tooLarge = err && err.httpCode === 413;
     res.status(tooLarge ? 413 : 400).json({
-      error: tooLarge ? 'That image is too large. Please keep it under 4 MB.' : 'Could not read the submitted form.'
+      error: tooLarge ? 'That file is too large. Please keep it under 4 MB.' : 'Could not read the submitted form.'
     });
     return;
   }
@@ -78,7 +79,7 @@ module.exports = async (req, res) => {
   const hasImage = Boolean(imageFile && imageFile.size > 0);
 
   if (!hasLink && !hasImage) {
-    res.status(400).json({ error: 'Please provide either a link to your award or an image.' });
+    res.status(400).json({ error: 'Please provide either a link to your award or a file.' });
     return;
   }
 
@@ -89,11 +90,11 @@ module.exports = async (req, res) => {
 
   if (hasImage) {
     if (imageFile.size > MAX_FILE_SIZE) {
-      res.status(413).json({ error: 'That image is too large. Please keep it under 4 MB.' });
+      res.status(413).json({ error: 'That file is too large. Please keep it under 4 MB.' });
       return;
     }
-    if (imageFile.mimetype && !ALLOWED_IMAGE_TYPES.includes(imageFile.mimetype)) {
-      res.status(400).json({ error: 'Please upload a JPG, PNG, WEBP or GIF image.' });
+    if (imageFile.mimetype && !ALLOWED_FILE_TYPES.includes(imageFile.mimetype)) {
+      res.status(400).json({ error: 'Please upload a JPG, PNG, WEBP, GIF or PDF file.' });
       return;
     }
   }
@@ -102,20 +103,39 @@ module.exports = async (req, res) => {
     let bodyContent;
 
     if (hasImage) {
+      const isPdf = imageFile.mimetype === 'application/pdf';
       const buffer = fs.readFileSync(imageFile.filepath);
       const uploaded = await uploadImageToCircle(buffer, imageFile);
-      bodyContent = [
-        {
-          type: 'image',
-          attrs: {
-            url: uploaded.url,
-            signed_id: uploaded.signed_id,
-            content_type: imageFile.mimetype || 'image/png',
-            width: '100%',
-            alignment: 'center'
+
+      if (isPdf) {
+        // Circle's image node can't render a PDF inline, so link straight to
+        // the uploaded file instead (same pattern as the "link to award" mode).
+        bodyContent = [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'View uploaded award (PDF)',
+                marks: [{ type: 'link', attrs: { href: uploaded.url, target: '_blank' } }]
+              }
+            ]
           }
-        }
-      ];
+        ];
+      } else {
+        bodyContent = [
+          {
+            type: 'image',
+            attrs: {
+              url: uploaded.url,
+              signed_id: uploaded.signed_id,
+              content_type: imageFile.mimetype || 'image/png',
+              width: '100%',
+              alignment: 'center'
+            }
+          }
+        ];
+      }
     } else {
       const link = awardLink.trim();
       bodyContent = [
@@ -224,7 +244,7 @@ async function uploadImageToCircle(buffer, imageFile) {
 
   if (!putRes.ok) {
     const t = await putRes.text().catch(() => '');
-    throw new Error(`Uploading the image to storage failed (${putRes.status}): ${t.slice(0, 300)}`);
+    throw new Error(`Uploading the file to storage failed (${putRes.status}): ${t.slice(0, 300)}`);
   }
 
   return { signed_id: uploadRecord.signed_id, url: uploadRecord.url };
