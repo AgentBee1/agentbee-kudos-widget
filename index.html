@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Submit a Kudos Award — AgentBee</title>
+<title>Submit an Award — AgentBee</title>
 <style>
   :root {
     --brand: #2563eb;
@@ -172,6 +172,10 @@
     border: 1px solid #bbf7d0;
   }
   .status a { color: inherit; font-weight: 700; }
+  .status ul { margin: 0; padding-left: 18px; }
+  .status li { margin: 4px 0; }
+  .status li:first-child { margin-top: 0; }
+  .status li:last-child { margin-bottom: 0; }
   .field-error {
     color: var(--error);
     font-size: 12px;
@@ -182,7 +186,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>Submit a Kudos Award 🎖️</h1>
+    <h1>Submit an Award 🎖️</h1>
     <p class="subtitle">Won an award? Tell us about it and we'll post it to the Kudos page for the AgentBee community to see.</p>
 
     <form id="kudos-form" novalidate>
@@ -197,7 +201,7 @@
 
       <div class="mode-panel active" data-panel="link">
         <input type="url" id="awardLink" name="awardLink" placeholder="https://example.com/your-award" maxlength="1000">
-        <p class="hint">Paste the link to a page, article, or announcement about your award.</p>
+        <p class="hint">Paste the link to a page, article, or announcement about your award — e.g. Instagram, Facebook, LinkedIn.</p>
       </div>
 
       <div class="mode-panel" data-panel="image">
@@ -340,7 +344,7 @@
       form.reset();
       fileDrop.textContent = 'Click to choose an image, or drag one here';
       fileDrop.classList.remove('has-file');
-      showStatus('success', 'Thanks! Your award has been posted to the Kudos page.' + (data && data.url ? ' <a href="' + data.url + '" target="_blank" rel="noopener noreferrer">View it here</a>.' : ''));
+      showStatus('success', '<ul><li>Thanks! Your submission is under review.</li><li>Submit another award — use the form above.</li></ul>');
       submitBtn.textContent = 'Submit Award';
       submitBtn.disabled = false;
     } catch (err) {
