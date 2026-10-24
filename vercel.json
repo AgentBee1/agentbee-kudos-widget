@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "https://incident-report-widget.vercel.app/submit-award.html" },
+    { "source": "/api/submit-award", "destination": "https://incident-report-widget.vercel.app/api/submit-award" }
+  ]
+}
